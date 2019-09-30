@@ -1,9 +1,11 @@
-package com.ejfr1985.smack
+package com.ejfr1985.smack.Controller
 
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.ejfr1985.smack.R
+import com.ejfr1985.smack.Services.AuthService
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -53,6 +55,10 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserBtnClicked(view: View) {
+
+        AuthService.registerUser(this, "E@E.com", "123456") { complete ->
+            println(complete)
+        }
 
     }
 }
