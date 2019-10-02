@@ -47,7 +47,7 @@
         android:id="@+id/loginNavBarBtn"
         android:layout_width="wrap_content"
         android:layout_height="32dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginStart="12dp"
         android:background="@android:color/transparent"
         android:onClick="loginNavBarClicked"
         android:text="Login"
