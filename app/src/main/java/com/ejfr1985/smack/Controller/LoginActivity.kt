@@ -24,7 +24,7 @@ class LoginActivity : AppCompatActivity() {
         val email = loginEmailText.text.toString()
         val password = loginPasswordText.text.toString()
         enableSpinner(true)
-        inputManager()
+        hideKeyboard()
         if (email.isNotEmpty() && password.isNotEmpty()) {
 
             AuthService.loginUser(this, email, password) { loginSuccess ->
@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
-    fun inputManager() {
+    fun hideKeyboard() {
         val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (inputManager.isAcceptingText) {
             inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
