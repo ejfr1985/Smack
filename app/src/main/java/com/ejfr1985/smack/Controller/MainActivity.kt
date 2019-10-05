@@ -18,15 +18,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.ejfr1985.smack.Model.Channel
 import com.ejfr1985.smack.R
 import com.ejfr1985.smack.Services.AuthService
+import com.ejfr1985.smack.Services.MessageService
 import com.ejfr1985.smack.Services.UserDataService
 import com.ejfr1985.smack.Utilities.BROADCAST_USER_DATA_CHANGE
+import com.ejfr1985.smack.Utilities.SOCKET_URL
+import io.socket.client.IO
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.nav_header_main.*
 import java.util.zip.Inflater
 
 class MainActivity : AppCompatActivity() {
 
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -49,9 +57,22 @@ class MainActivity : AppCompatActivity() {
             userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE)
         )
+    }
 
-        hideKeyboard()
+    override fun onResume() {
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            userDataChangeReceiver,
+            IntentFilter(BROADCAST_USER_DATA_CHANGE)
+        )
+        super.onResume()
+
+    }
+
+    override fun onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        socket.disconnect()
+        super.onDestroy()
     }
 
     private val userDataChangeReceiver = object : BroadcastReceiver() {
@@ -78,13 +99,13 @@ class MainActivity : AppCompatActivity() {
 
     fun addChannelBtnClicked(view: View) {
 
-        if (AuthService.isLoggedIn){
+        if (AuthService.isLoggedIn) {
 
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
 
             builder.setView(dialogView)
-                .setPositiveButton("Add"){ dialog, which ->
+                .setPositiveButton("Add") { dialog, which ->
 
                     val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameText)
                     val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDescText)
@@ -92,18 +113,31 @@ class MainActivity : AppCompatActivity() {
                     val channelDesc = descTextField.text.toString()
 
 
+                    socket.emit("newChannel", channelName, channelDesc)
 
-                    hideKeyboard()
                 }
-                .setNegativeButton("Cancel"){ dialog, which ->
-
-                    hideKeyboard()
+                .setNegativeButton("Cancel") { dialog, which ->
 
                 }
                 .show()
         }
-
     }
+
+  private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+
+            val channelName = args[0].toString()
+            val channelDescription = args[1].toString()
+            val channelId = args[2].toString()
+
+            val newChannel = Channel(channelName, channelDescription, channelId)
+            MessageService.channels.add(newChannel)
+
+            println(newChannel.name)
+            println(newChannel.id)
+
+        }
+  }
 
     fun loginNavBarClicked(view: View) {
         if (AuthService.isLoggedIn) {
@@ -126,7 +160,7 @@ class MainActivity : AppCompatActivity() {
 
     fun sendMsgBtnClicked(view: View) {
 
-
+        hideKeyboard()
     }
 
     fun hideKeyboard() {
