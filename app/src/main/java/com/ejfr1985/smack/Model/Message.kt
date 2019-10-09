@@ -1,5 +1,7 @@
 package com.ejfr1985.smack.Model
 
-class Message constructor(messageBody: String, userId: String, channelId: String, userName: String,
-                          userAvatar: String, userAvatarColor: String, id: String, timeStamp: String) {
+class Message constructor(
+    val messageBody: String, val userName: String, val channelId: String,
+    val userAvatar: String, val userAvatarColor: String, val id: String, val timeStamp: String
+) {
 }

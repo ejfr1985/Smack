@@ -124,9 +124,19 @@ class MainActivity : AppCompatActivity() {
     fun updateWithChannel() {
 
         mainChannelName.text = "#${selectedChannel?.name}"
-
         // will download selected channel messages
 
+        if (selectedChannel != null) {
+
+            MessageService.getMessages(selectedChannel!!.id) { complete ->
+
+                if (complete) {
+                    for (message in MessageService.messages) {
+                        println(message.messageBody)
+                    }
+                }
+            }
+        }
     }
 
     override fun onBackPressed() {
@@ -165,33 +175,43 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val onNewChannel = Emitter.Listener { args ->
-        runOnUiThread {
 
-            val channelName = args[0].toString()
-            val channelDescription = args[1].toString()
-            val channelId = args[2].toString()
-
-            val newChannel = Channel(channelName, channelDescription, channelId)
-            MessageService.channels.add(newChannel)
-
-            channelAdapter.notifyDataSetChanged()
+        if (App.prefs.isLoggedIn) {
+            runOnUiThread {
+                val channelName = args[0].toString()
+                val channelDescription = args[1].toString()
+                val channelId = args[2].toString()
+                val newChannel = Channel(channelName, channelDescription, channelId)
+                MessageService.channels.add(newChannel)
+                channelAdapter.notifyDataSetChanged()
+            }
 
         }
     }
 
     private val onNewMessage = Emitter.Listener { args ->
 
-        val messageBody = args[0].toString()
-        val userId = args[1].toString()
-        val channelId = args[2].toString()
-        val userName = args[3].toString()
-        val userAvatar = args[4].toString()
-        val userAvatarColor = args[5].toString()
-        val id = args[6].toString()
-        val timeStamp = args[7].toString()
 
-        val newMessage = Message(messageBody, userId, channelId, userName, userAvatar, userAvatarColor, id, timeStamp)
-        MessageService.messages.add(newMessage)
+        if (App.prefs.isLoggedIn) {
+            runOnUiThread {
+                val channelId = args[2].toString()
+                if (channelId == selectedChannel?.id) {
+                    val messageBody = args[0].toString()
+                    val userId = args[1].toString()
+                    val userName = args[3].toString()
+                    val userAvatar = args[4].toString()
+                    val userAvatarColor = args[5].toString()
+                    val id = args[6].toString()
+                    val timeStamp = args[7].toString()
+
+                    val newMessage =
+                        Message(messageBody, userName, channelId, userAvatar, userAvatarColor, id, timeStamp)
+                    MessageService.messages.add(newMessage)
+                }
+
+            }
+        }
+
 
     }
 
