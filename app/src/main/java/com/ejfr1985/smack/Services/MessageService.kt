@@ -20,7 +20,7 @@ object MessageService {
             Response.Listener { response ->
 
                 try {
-
+                    this.channels.clear()
                     for (x in 0 until response.length()){
                         val channel = response.getJSONObject(x)
                         val name = channel.getString("name")
