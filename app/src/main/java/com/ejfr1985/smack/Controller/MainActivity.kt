@@ -74,6 +74,10 @@ class MainActivity : AppCompatActivity() {
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
         setupAdapters()
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            userDataChangeReceiver,
+            IntentFilter(BROADCAST_USER_DATA_CHANGE)
+        )
 
         channel_list.setOnItemClickListener { _, _, i, _ ->
 
@@ -86,16 +90,6 @@ class MainActivity : AppCompatActivity() {
             AuthService.findUserByEmail(this) {}
         }
 
-
-    }
-
-    override fun onResume() {
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            userDataChangeReceiver,
-            IntentFilter(BROADCAST_USER_DATA_CHANGE)
-        )
-        super.onResume()
 
     }
 
@@ -239,6 +233,7 @@ class MainActivity : AppCompatActivity() {
             userImageNavBar.setImageResource(R.drawable.profiledefault)
             userImageNavBar.setBackgroundColor(Color.TRANSPARENT)
             loginNavBarBtn.text = "Login"
+            mainChannelName.text = "Please Log In"
 
 
         } else {
